@@ -7,13 +7,34 @@
 - [ROS API](#ros-api)
 - [Creators](#creators)
 
-A ROS Driver which reads the raw data from the SICK Safetyscanners and publishes the data as a laser_scan msg.
+A ROS Driver which reads the raw data from the SICK Safety Scanners and publishes the data as a laser_scan msg.
 
 ## Supported Hardware
 
-| Device Name  | Type | Description |
-| ------------- | ------------- | ------------- |
-| microScan3 Pro | MICS3-CBAZ55ZA1  | Safety Laserscanner,  EFIPRO, Protective field range 5.5m, Scanning angle 275°  |
+![ ](docs/images/mS3-ROS-logo.PNG  "Sick microScan3")
+
+| Product Family  | Product Type | Description |
+| ---------------------- | -------------------- | ------------- |
+| microScan3 Core | MICS3-ACAZ40PZ1 | Safety Laser Scanner, PROFINET PROFIsafe, Protective Field Range: 4 m |
+|  | MICS3-ACAZ55PZ1 | Safety Laser Scanner, PROFINET PROFIsafe,  Protective Field Range: 5.5 m |
+|  | MICS3-ACAZ90PZ1 | Safety Laser Scanner, PROFINET PROFIsafe,  Protective Field Range: 9 m |
+|  | MICS3-ABAZ40IZ1 | Safety Laser Scanner, EtherNet/IP CIP Safety,  Protective Field Range: 4 m |
+|  | MICS3-ABAZ55IZ1 | Safety Laser Scanner, EtherNet/IP CIP Safety, Protective Field Range: 5.5 m |
+|  | MICS3-ABAZ90IZ1 | Safety Laser Scanner, EtherNet/IP CIP Safety, Protective Field Range: 9 m |
+|  | MICS3-ABAZ40ZA1 | Safety Laser Scanner, EFI-pro,  Protective Field Range: 4 m |
+|  | MICS3-ABAZ55ZA1 | Safety Laser Scanner, EFI-pro, Protective Field Range: 5.5 m |
+|  | MICS3-ABAZ90ZA1 | Safety Laser Scanner, EFI-pro, Protective Field Range: 9 m |
+|  |  |  |
+| microScan3 Pro | MICS3-CBAZ40PZ1 | Safety Laser Scanner, PROFINET PROFIsafe, Protective Field Range: 4 m |
+|  | MICS3-CBAZ55PZ1 | Safety Laser Scanner, PROFINET PROFIsafe,  Protective Field Range: 5.5 m |
+|  | MICS3-CBAZ90PZ1 | Safety Laser Scanner, PROFINET PROFIsafe,  Protective Field Range: 9 m |
+|  | MICS3-CBAZ40IZ1 | Safety Laser Scanner, EtherNet/IP CIP Safety,  Protective Field Range: 4 m |
+|  | MICS3-CBAZ55IZ1 | Safety Laser Scanner, EtherNet/IP CIP Safety, Protective Field Range: 5.5 m |
+|  | MICS3-CBAZ90IZ1 | Safety Laser Scanner, EtherNet/IP CIP Safety, Protective Field Range: 9 m |
+|  | MICS3-CBAZ40ZA1 | Safety Laser Scanner, EFI-pro,  Protective Field Range: 4 m |
+|  | MICS3-CBAZ55ZA1 | Safety Laser Scanner, EFI-pro, Protective Field Range: 5.5 m |
+|  | MICS3-CBAZ90ZA1 | Safety Laser Scanner, EFI-pro, Protective Field Range: 9 m |
+|  |  |  |
 
 ## Getting started
 
@@ -23,8 +44,8 @@ The ROS driver will be released as a debian package, and therefore can be instal
 
 * Linux
 * Working ROS-Distro
-* Correctly setup SickSafetyscanner
-* Connected SickSafetyscanners and a correctly setup ethernet network. Both the host and the sensor have to be in the same network.
+* Correctly setup SICK Safety Scanner
+* Connected SICK Safety Scanner and a correctly setup ethernet network. Both the host and the sensor have to be in the same network.
 
 ### Installation
 
@@ -32,9 +53,9 @@ In the following instructions, replace `<rosdistro>` with the name of your ROS d
 
 #### From Binaries
 
-The driver is released at longer intervals as a binary package. At the moment the initial release is still in progress. Once it is released it can be installed with the foloowing command:
+The driver is released at longer intervals as a binary package. 
 
-~~`sudo apt-get install ros-<rosdistro>-sick_safetyscanners`~~
+`sudo apt-get install ros-<rosdistro>-sick_safetyscanners`
 
 
 #### From Source
@@ -51,10 +72,10 @@ source ~/catkin_ws/install/setup.bash
 
 ### Starting
 
-To start the driver the launch file has to be started. For the driver to work correctly, the sensor ip, sensor tcp port, host ip and host udp port have to be defined. These parameters can be passed to the sensor as arguments via launch file.
+To start the driver the launch file has to be started. For the driver to work correctly, the sensor ip, sensor tcp port and host ip have to be defined. These parameters can be passed to the sensor as arguments via launch file.
 
 ```
-roslaunch sick_safetyscanners sick_safetyscanners.launch sensor_ip:=192.168.1.10 sensor_tcp_port:=2122 host_ip:=192.168.1.9 host_udp_port:=6060
+roslaunch sick_safetyscanners sick_safetyscanners.launch sensor_ip:=192.168.1.10 sensor_tcp_port:=2122 host_ip:=192.168.1.9
 ```
 
 This will start the driver and the dynamic reconfigure node. In this you can set different parameters on runtime, especially the angles and the data the sensor should publish. If these parameters should be set on startup they can be loaded to the parameter server beforehand.
@@ -85,17 +106,31 @@ rosrun rviz rviz
 Publishes a scan from the laserscanner
 
 `
-~/extended_laser_scan (type sick_safetyscanners/ExtendedLaserScanMsg)
+~/extended_laser_scan (type: sick_safetyscanners/ExtendedLaserScanMsg)
 `
 
-Extends the basic laser scan message by reflektor data and intrusion data.
+Extends the basic laser scan message by reflector data and intrusion data.
+
+`
+~/output_paths (type: sick_safetyscanners/OutputPathMsg)
+`
+
+Gives feedback of the current status of the output paths.
 
 
 `
 ~/raw_data (type: sick_safetyscanners/RawMicroScanDataMsg)
 `
 
-Publishes the raw data from the sensor as a ros message.
+Publishes the raw data from the sensor as a ROS message.
+
+### Advertised ROS Services
+
+`
+~/field_data
+`
+
+Returns all configured protective and warning fields for the sensor
 
 
 ### ROS parameters
@@ -105,17 +140,18 @@ Publishes the raw data from the sensor as a ros message.
 | sensor_ip                    | String | 192.168.1.11 | ✔ |Sensor IP address. Can be passed as an argument to the launch file. |
 | sensor_tcp_port          | Integer | 2122 | ✔ | Sensor TCP Port.  Can be passed as an argument to the launch file. |
 | host_ip                        |   String  | 192.168.1.9 | ✔ | Host IP address.  Can be passed as an argument to the launch file.  |
-| host_udp_port             | Integer | 6061 | ✔ | Host UDP Port.  Can be passed as an argument to the launch file.  |
-| laser_scan_frame_name  | String | laser_scan | | The frame name of the sensor message  |
-| publish_frequency    | Integer | 1 | | How many scans should be publised (1 means every scan, 2 every second scan, ... ) |
-| angle_start              | Double |  0.0| | Start angle of scan, if both start and end angle are set to 0, all angels are regarded  |
-| angle_end                | Double | 0.0 | | End angle of scan, if both start and end angle are set to 0, all angels are regarded  |
+| host_udp_port             | Integer | 0 | | Host UDP Port.  Can be passed as an argument to the launch file.  Zero allows system chosen port. |
+| frame_id  | String | scan | | The frame name of the sensor message  |
+| skip    | Integer | 0 | | The number of scans to skip between each measured scan.  For a 25Hz laser, setting 'skip' to 0 makes it publish at 25Hz, 'skip' to 1 makes it publish at 12.5Hz. |
+| angle_start              | Double |  0.0| | Start angle of scan in radians, if both start and end angle are equal, all angels are regarded  |
+| angle_end                | Double | 0.0 | | End angle of scan in radians, if both start and end angle are equal, all angels are regarded  |
 | channel_enabled     | Boolean | true | | If the channel should be enabled  |
 | general_system_state  | Boolean | true | | If the general system state should be published  |
 | derived_settings      | Boolean | true | | If the derived settings should be published  |
 | measurement_data  | Boolean | true | | If the measurement data should be published  |
 | intrusion_data          | Boolean | true | | If the intrusion data should be published  |
 | application_io_data  | Boolean | true | | If the application IO data should be published  |
+| use_sick_angles | Boolean |  false | | If this flag is set, the predefined angles from SICK are used. If this flag is set to false an offset of -90° is added to the angles so that 0° is at the front of the scanner. |
 
 ## Creators
 

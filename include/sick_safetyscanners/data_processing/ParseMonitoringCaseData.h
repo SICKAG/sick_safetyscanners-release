@@ -25,21 +25,23 @@
 
 //----------------------------------------------------------------------
 /*!
- * \file ParseFieldHeaderData.h
+ * \file ParseMonitoringCaseData.h
  *
  * \author  Lennart Puck <puck@fzi.de>
- * \date    2018-10-16
+ * \date    2018-11-29
  */
 //----------------------------------------------------------------------
 
-#ifndef SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEFIELDHEADERDATA_H
-#define SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEFIELDHEADERDATA_H
+#ifndef SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEMONITORINGCASEDATA_H
+#define SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEMONITORINGCASEDATA_H
 
 #include <sick_safetyscanners/datastructure/Data.h>
-#include <sick_safetyscanners/datastructure/FieldData.h>
+#include <sick_safetyscanners/datastructure/MonitoringCaseData.h>
 #include <sick_safetyscanners/datastructure/PacketBuffer.h>
 
 #include <sick_safetyscanners/data_processing/ReadWriteHelper.h>
+
+#include <vector>
 
 namespace sick {
 
@@ -47,37 +49,36 @@ namespace data_processing {
 
 
 /*!
- * \brief Parser to read the field header for protective and warning fields.
+ * \brief Parser to read monitoring case data.
  */
-class ParseFieldHeaderData
+class ParseMonitoringCaseData
 {
 public:
   /*!
    * \brief Constructor of the parser.
    */
-  ParseFieldHeaderData();
+  ParseMonitoringCaseData();
 
   /*!
-   * \brief Parses a tcp sequence to read the header for a warning or protective field.
+   * \brief Parses a tcp sequence and return the monitoring case data.
    *
    * \param buffer The incoming tcp sequence.
-   * \param field_data Reference to the field data where the information will be set.
+   * \param monitoring_case_data Reference to the monitoring case data.
    *
-   * \returns If parsing was successful.
+   * \returns If parsing the sequence was successful.
    */
   bool parseTCPSequence(const datastructure::PacketBuffer& buffer,
-                        datastructure::FieldData& field_data) const;
+                        datastructure::MonitoringCaseData& monitoring_case_data) const;
 
 private:
   std::shared_ptr<sick::data_processing::ReadWriteHelper> m_reader_ptr;
-
   bool isValid(const uint8_t*& data_ptr) const;
-  void setFieldType(const uint8_t*& data_ptr, datastructure::FieldData& field_data) const;
-  uint8_t readFieldType(const uint8_t*& data_ptr) const;
-  uint16_t readSetIndex(const uint8_t*& data_ptr) const;
+  uint16_t readMonitoringCaseNumber(const uint8_t*& data_ptr) const;
+  uint16_t readFieldIndex(const uint8_t*& data_ptr, const uint8_t index) const;
+  bool readFieldValid(const uint8_t*& data_ptr, const uint8_t index) const;
 };
 
 } // namespace data_processing
 } // namespace sick
 
-#endif // SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEFIELDHEADERDATA_H
+#endif // SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEFIELDGEOMETRYDATA_H

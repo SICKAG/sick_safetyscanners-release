@@ -39,6 +39,16 @@ namespace datastructure {
 
 FieldData::FieldData() {}
 
+bool FieldData::getIsValid() const
+{
+  return m_is_valid;
+}
+
+void FieldData::setIsValid(bool is_valid)
+{
+  m_is_valid = is_valid;
+}
+
 uint16_t FieldData::getFieldSetIndex() const
 {
   return m_field_set_index;
@@ -57,16 +67,6 @@ bool FieldData::getIsWarningField() const
 void FieldData::setIsWarningField(bool is_warning_field)
 {
   m_is_warning_field = is_warning_field;
-}
-
-ScanPoint FieldData::getFieldGeometry() const
-{
-  return m_field_geometry;
-}
-
-void FieldData::setFieldGeometry(const ScanPoint& field_geometry)
-{
-  m_field_geometry = field_geometry;
 }
 
 bool FieldData::getIsProtectiveField() const
@@ -89,6 +89,35 @@ void FieldData::setBeamDistances(const std::vector<uint16_t>& beam_distance)
   m_beam_distances = beam_distance;
 }
 
+float FieldData::getStartAngle() const
+{
+  return m_start_angle;
+}
+
+void FieldData::setStartAngle(const int32_t& start_angle)
+{
+  m_start_angle = (float)start_angle / ANGLE_RESOLUTION;
+}
+
+void FieldData::setStartAngleDegrees(const float& start_angle)
+{
+  m_start_angle = start_angle;
+}
+
+float FieldData::getAngularBeamResolution() const
+{
+  return m_angular_beam_resolution;
+}
+
+void FieldData::setAngularBeamResolution(const int32_t& angular_beam_resolution)
+{
+  m_angular_beam_resolution = (float)angular_beam_resolution / ANGLE_RESOLUTION;
+}
+
+void FieldData::setAngularBeamResolutionDegrees(const float& angular_beam_resolution)
+{
+  m_angular_beam_resolution = angular_beam_resolution;
+}
 
 } // namespace datastructure
 } // namespace sick

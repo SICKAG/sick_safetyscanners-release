@@ -72,7 +72,7 @@ void ChangeCommSettingsCommand::writeDataToDataPtr(uint8_t*& data_ptr) const
   writeChannelToDataPtr(data_ptr);
   writeEnabledToDataPtr(data_ptr);
   writeEInterfaceTypeToDataPtr(data_ptr);
-  writeIPAdresstoDataPtr(data_ptr);
+  writeIPAddresstoDataPtr(data_ptr);
   writePortToDataPtr(data_ptr);
   writeFrequencyToDataPtr(data_ptr);
   writeStartAngleToDataPtr(data_ptr);
@@ -109,7 +109,7 @@ void ChangeCommSettingsCommand::writeEInterfaceTypeToDataPtr(uint8_t*& data_ptr)
   m_writer_ptr->writeuint8_tLittleEndian(data_ptr, m_settings.getEInterfaceType(), 5);
 }
 
-void ChangeCommSettingsCommand::writeIPAdresstoDataPtr(uint8_t*& data_ptr) const
+void ChangeCommSettingsCommand::writeIPAddresstoDataPtr(uint8_t*& data_ptr) const
 {
   m_writer_ptr->writeuint32_tLittleEndian(data_ptr, m_settings.getHostIp().to_ulong(), 8);
 }
@@ -121,7 +121,7 @@ void ChangeCommSettingsCommand::writePortToDataPtr(uint8_t*& data_ptr) const
 
 void ChangeCommSettingsCommand::writeFrequencyToDataPtr(uint8_t*& data_ptr) const
 {
-  m_writer_ptr->writeuint16_tLittleEndian(data_ptr, m_settings.getPublishingFequency(), 14);
+  m_writer_ptr->writeuint16_tLittleEndian(data_ptr, m_settings.getPublishingFrequency(), 14);
 }
 
 void ChangeCommSettingsCommand::writeStartAngleToDataPtr(uint8_t*& data_ptr) const
