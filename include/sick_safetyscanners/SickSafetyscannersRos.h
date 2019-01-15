@@ -47,10 +47,13 @@
 
 // Package
 #include <sick_safetyscanners/ExtendedLaserScanMsg.h>
+#include <sick_safetyscanners/FieldData.h>
+#include <sick_safetyscanners/OutputPathsMsg.h>
 #include <sick_safetyscanners/RawMicroScanDataMsg.h>
 #include <sick_safetyscanners/SickSafetyscanners.h>
 #include <sick_safetyscanners/SickSafetyscannersConfigurationConfig.h>
 #include <sick_safetyscanners/datastructure/CommSettings.h>
+#include <sick_safetyscanners/datastructure/FieldData.h>
 
 #include <dynamic_reconfigure/server.h>
 
@@ -76,6 +79,18 @@ inline float degToRad(float deg)
 inline float radToDeg(float rad)
 {
   return rad * 180.0f / M_PI;
+}
+
+/*!
+ * \brief Converts a skip value into a "publish frequency" value
+ * \param skip The number of scans to skip between each measured scan.  For a 25Hz laser, setting
+ * 'skip' to 0 makes it publish at 25Hz, 'skip' to 1 makes it publish at 12.5Hz. \return "Publish
+ * Frequency" ie. One out of every n_th scan will be published.  1 is publish every scan.  2 is
+ * publish at half rate, and so on.
+ */
+inline uint16_t skipToPublishFrequency(int skip)
+{
+  return skip + 1;
 }
 
 /*!
@@ -112,6 +127,9 @@ private:
   ros::Publisher m_laser_scan_publisher;
   ros::Publisher m_extended_laser_scan_publisher;
   ros::Publisher m_raw_data_publisher;
+  ros::Publisher m_output_path_publisher;
+
+  ros::ServiceServer m_field_service_server;
 
   bool m_initialised;
 
@@ -122,9 +140,13 @@ private:
   dynamic_reconfigure::Server<sick_safetyscanners::SickSafetyscannersConfigurationConfig>
     m_dynamic_reconfiguration_server;
 
-  std::string m_laser_scan_frame_name;
+  std::string m_frame_id;
+  double m_time_offset;
   double m_range_min;
   double m_range_max;
+
+  bool m_use_sick_angles;
+  float m_angle_offset;
 
   /*!
    * @brief Reads and verifies the ROS parameters.
@@ -143,14 +165,19 @@ private:
    * \param config The new configuration to set
    * \param level Level of the new configuration
    */
-  void callback(const sick_safetyscanners::SickSafetyscannersConfigurationConfig& config,
-                const uint32_t& level);
+  void
+  reconfigure_callback(const sick_safetyscanners::SickSafetyscannersConfigurationConfig& config,
+                       const uint32_t& level);
 
   bool isInitialised();
 
   sensor_msgs::LaserScan createLaserScanMessage(const sick::datastructure::Data& data);
   sick_safetyscanners::ExtendedLaserScanMsg
   createExtendedLaserScanMessage(const sick::datastructure::Data& data);
+  std::vector<bool>
+  getMedianReflectors(const std::vector<sick::datastructure::ScanPoint> scan_points);
+  sick_safetyscanners::OutputPathsMsg
+  createOutputPathsMessage(const sick::datastructure::Data& data);
   sick_safetyscanners::RawMicroScanDataMsg
   createRawDataMessage(const sick::datastructure::Data& data);
   sick_safetyscanners::DataHeaderMsg createDataHeaderMessage(const sick::datastructure::Data& data);
@@ -173,6 +200,9 @@ private:
   sick_safetyscanners::ApplicationOutputsMsg
   createApplicationOutputsMessage(const sick::datastructure::Data& data);
   void readTypeCodeSettings();
+
+  bool getFieldData(sick_safetyscanners::FieldData::Request& req,
+                    sick_safetyscanners::FieldData::Response& res);
 };
 
 } // namespace sick

@@ -25,15 +25,15 @@
 
 //----------------------------------------------------------------------
 /*!
- * \file ParseFieldHeaderData.h
+ * \file ParseMeasurementCurrentConfigData.h
  *
  * \author  Lennart Puck <puck@fzi.de>
  * \date    2018-10-16
  */
 //----------------------------------------------------------------------
 
-#ifndef SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEFIELDHEADERDATA_H
-#define SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEFIELDHEADERDATA_H
+#ifndef SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEMEASUREMENTCURRENTCONFIGDATA_H
+#define SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEMEASUREMENTCURRENTCONFIGDATA_H
 
 #include <sick_safetyscanners/datastructure/Data.h>
 #include <sick_safetyscanners/datastructure/FieldData.h>
@@ -49,13 +49,13 @@ namespace data_processing {
 /*!
  * \brief Parser to read the field header for protective and warning fields.
  */
-class ParseFieldHeaderData
+class ParseMeasurementCurrentConfigData
 {
 public:
   /*!
    * \brief Constructor of the parser.
    */
-  ParseFieldHeaderData();
+  ParseMeasurementCurrentConfigData();
 
   /*!
    * \brief Parses a tcp sequence to read the header for a warning or protective field.
@@ -71,13 +71,10 @@ public:
 private:
   std::shared_ptr<sick::data_processing::ReadWriteHelper> m_reader_ptr;
 
-  bool isValid(const uint8_t*& data_ptr) const;
-  void setFieldType(const uint8_t*& data_ptr, datastructure::FieldData& field_data) const;
-  uint8_t readFieldType(const uint8_t*& data_ptr) const;
-  uint16_t readSetIndex(const uint8_t*& data_ptr) const;
+  uint32_t readAngularBeamResolution(const uint8_t* data_ptr) const;
 };
 
 } // namespace data_processing
 } // namespace sick
 
-#endif // SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEFIELDHEADERDATA_H
+#endif // SICK_SAFETYSCANNERS_DATA_PROCESSING_PARSEMEASUREMENTCURRENTCONFIGDATA_H

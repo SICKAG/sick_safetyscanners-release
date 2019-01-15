@@ -39,7 +39,7 @@ namespace sick {
 
 SickSafetyscanners::SickSafetyscanners(
   packetReceivedCallbackFunction newPacketReceivedCallbackFunction,
-  sick::datastructure::CommSettings settings)
+  sick::datastructure::CommSettings* settings)
   : m_newPacketReceivedCallbackFunction(newPacketReceivedCallbackFunction)
 {
   ROS_INFO("Starting SickSafetyscanners");
@@ -47,7 +47,10 @@ SickSafetyscanners::SickSafetyscanners(
   m_async_udp_client_ptr = std::make_shared<sick::communication::AsyncUDPClient>(
     boost::bind(&SickSafetyscanners::processUDPPacket, this, _1),
     boost::ref(*m_io_service_ptr),
-    settings.getHostUdpPort());
+    settings->getHostUdpPort());
+  settings->setHostUdpPort(
+    m_async_udp_client_ptr
+      ->get_local_port()); // Store which port was used, needed for data request from the laser
   m_packet_merger_ptr = std::make_shared<sick::data_processing::UDPPacketMerger>();
   ROS_INFO("Started SickSafetyscanners");
 }
@@ -62,7 +65,7 @@ bool SickSafetyscanners::run()
   m_udp_client_thread_ptr.reset(
     new boost::thread(boost::bind(&SickSafetyscanners::UDPClientThread, this)));
 
-  m_async_udp_client_ptr->run_service();
+  m_async_udp_client_ptr->runService();
   return true;
 }
 
@@ -85,7 +88,7 @@ void SickSafetyscanners::changeSensorSettings(const datastructure::CommSettings&
 {
   startTCPConnection(settings);
 
-  changeCommSettingsinColaSession(settings);
+  changeCommSettingsInColaSession(settings);
 
   stopTCPConnection();
 }
@@ -95,10 +98,42 @@ void SickSafetyscanners::requestTypeCode(const datastructure::CommSettings& sett
 {
   startTCPConnection(settings);
 
-  requestTypeCodeinColaSession(type_code);
+  requestTypeCodeInColaSession(type_code);
 
   stopTCPConnection();
 }
+
+void SickSafetyscanners::requestFieldData(const datastructure::CommSettings& settings,
+                                          std::vector<sick::datastructure::FieldData>& field_data)
+{
+  startTCPConnection(settings);
+
+  requestFieldDataInColaSession(field_data);
+
+  stopTCPConnection();
+}
+
+void SickSafetyscanners::requestMonitoringCases(
+  const datastructure::CommSettings& settings,
+  std::vector<sick::datastructure::MonitoringCaseData>& monitoring_cases)
+{
+  startTCPConnection(settings);
+
+  requestMonitoringCaseDataInColaSession(monitoring_cases);
+
+  stopTCPConnection();
+}
+
+void SickSafetyscanners::requestDeviceName(const datastructure::CommSettings& settings,
+                                           std::string& device_name)
+{
+  startTCPConnection(settings);
+
+  requestDeviceNameInColaSession(device_name);
+
+  stopTCPConnection();
+}
+
 
 void SickSafetyscanners::startTCPConnection(const sick::datastructure::CommSettings& settings)
 {
@@ -108,53 +143,108 @@ void SickSafetyscanners::startTCPConnection(const sick::datastructure::CommSetti
       boost::ref(*m_io_service_ptr),
       settings.getSensorIp(),
       settings.getSensorTcpPort());
-  async_tcp_client->do_connect();
+  async_tcp_client->doConnect();
+
+  m_session_ptr.reset();
   m_session_ptr = std::make_shared<sick::cola2::Cola2Session>(async_tcp_client);
+
+  m_session_ptr->open();
 }
 
-void SickSafetyscanners::changeCommSettingsinColaSession(
+void SickSafetyscanners::changeCommSettingsInColaSession(
   const datastructure::CommSettings& settings)
 {
-  m_session_ptr->open();
   sick::cola2::Cola2Session::CommandPtr command_ptr =
     std::make_shared<sick::cola2::ChangeCommSettingsCommand>(boost::ref(*m_session_ptr), settings);
   m_session_ptr->executeCommand(command_ptr);
+}
 
-  sick::datastructure::FieldData field_data;
-  command_ptr = std::make_shared<sick::cola2::FieldHeaderVariableCommand>(
-    boost::ref(*m_session_ptr), field_data, 1);
+void SickSafetyscanners::requestFieldDataInColaSession(
+  std::vector<sick::datastructure::FieldData>& fields)
+{
+  sick::datastructure::FieldData common_field_data;
+
+  sick::cola2::Cola2Session::CommandPtr command_ptr =
+    std::make_shared<sick::cola2::MeasurementPersistentConfigVariableCommand>(
+      boost::ref(*m_session_ptr), common_field_data);
   m_session_ptr->executeCommand(command_ptr);
 
-  command_ptr = std::make_shared<sick::cola2::FieldGeometryVariableCommand>(
-    boost::ref(*m_session_ptr), field_data, 1);
+  command_ptr = std::make_shared<sick::cola2::MeasurementCurrentConfigVariableCommand>(
+    boost::ref(*m_session_ptr), common_field_data);
   m_session_ptr->executeCommand(command_ptr);
 
   command_ptr = std::make_shared<sick::cola2::MonitoringCaseTableHeaderVariableCommand>(
-    boost::ref(*m_session_ptr), field_data);
+    boost::ref(*m_session_ptr), common_field_data);
   m_session_ptr->executeCommand(command_ptr);
 
-  command_ptr = std::make_shared<sick::cola2::DeviceNameVariableCommand>(boost::ref(*m_session_ptr),
-                                                                         m_device_name);
-  m_session_ptr->executeCommand(command_ptr);
+  for (int i = 0; i < 128; i++)
+  {
+    sick::datastructure::FieldData field_data;
 
-  ROS_INFO("Device name: %s", m_device_name.c_str());
+    command_ptr = std::make_shared<sick::cola2::FieldHeaderVariableCommand>(
+      boost::ref(*m_session_ptr), field_data, i);
+    m_session_ptr->executeCommand(command_ptr);
 
-  m_session_ptr->close();
+    if (field_data.getIsValid())
+    {
+      command_ptr = std::make_shared<sick::cola2::FieldGeometryVariableCommand>(
+        boost::ref(*m_session_ptr), field_data, i);
+      m_session_ptr->executeCommand(command_ptr);
+
+      field_data.setStartAngleDegrees(common_field_data.getStartAngle());
+      field_data.setAngularBeamResolutionDegrees(common_field_data.getAngularBeamResolution());
+
+      fields.push_back(field_data);
+    }
+    else if (i > 0) // index 0 is reserved for contour data
+    {
+      break; // skip other requests after first invalid
+    }
+  }
 }
 
-void SickSafetyscanners::requestTypeCodeinColaSession(sick::datastructure::TypeCode& type_code)
+void SickSafetyscanners::requestMonitoringCaseDataInColaSession(
+  std::vector<sick::datastructure::MonitoringCaseData>& monitoring_cases)
 {
-  m_session_ptr->open();
+  sick::cola2::Cola2Session::CommandPtr command_ptr;
+  for (int i = 0; i < 254; i++)
+  {
+    sick::datastructure::MonitoringCaseData monitoring_case_data;
+
+    command_ptr = std::make_shared<sick::cola2::MonitoringCaseVariableCommand>(
+      boost::ref(*m_session_ptr), monitoring_case_data, i);
+    m_session_ptr->executeCommand(command_ptr);
+    if (monitoring_case_data.getIsValid())
+    {
+      monitoring_cases.push_back(monitoring_case_data);
+    }
+    else
+    {
+      break; // skip other requests after first invalid
+    }
+  }
+}
+
+void SickSafetyscanners::requestDeviceNameInColaSession(std::string& device_name)
+{
+  sick::cola2::Cola2Session::CommandPtr command_ptr =
+    std::make_shared<sick::cola2::DeviceNameVariableCommand>(boost::ref(*m_session_ptr),
+                                                             device_name);
+  m_session_ptr->executeCommand(command_ptr);
+  ROS_INFO("Device name: %s", device_name.c_str());
+}
+
+void SickSafetyscanners::requestTypeCodeInColaSession(sick::datastructure::TypeCode& type_code)
+{
   sick::cola2::Cola2Session::CommandPtr command_ptr =
     std::make_shared<sick::cola2::TypeCodeVariableCommand>(boost::ref(*m_session_ptr), type_code);
   m_session_ptr->executeCommand(command_ptr);
-
-  m_session_ptr->close();
 }
 
 void SickSafetyscanners::stopTCPConnection()
 {
-  m_session_ptr.reset();
+  m_session_ptr->close();
+  m_session_ptr->doDisconnect();
 }
 
 
