@@ -59,26 +59,57 @@ AsyncTCPClient::AsyncTCPClient(PacketHandler packet_handler,
   ROS_INFO("TCP client is setup");
 }
 
-AsyncTCPClient::~AsyncTCPClient()
+AsyncTCPClient::~AsyncTCPClient() {}
+
+void AsyncTCPClient::doDisconnect()
 {
-  m_socket_ptr->close();
+  boost::mutex::scoped_lock lock(m_socket_mutex);
+  boost::system::error_code ec;
+  m_socket_ptr->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+  if (ec != 0)
+  {
+    ROS_ERROR("Error shutting socket down: %i", ec.value());
+  }
+  else
+  {
+    ROS_INFO("TCP Connection successfully shutdown");
+  }
+
+  m_socket_ptr->close(ec);
+  if (ec != 0)
+  {
+    ROS_ERROR("Error closing Socket: %i", ec.value());
+  }
+  else
+  {
+    ROS_INFO("TCP Socket successfully closed.");
+  }
 }
 
-void AsyncTCPClient::do_connect()
+void AsyncTCPClient::doConnect()
 {
-  boost::mutex::scoped_lock lock(m_connect_mutex);
+  boost::mutex::scoped_lock lock(m_socket_mutex);
+  boost::mutex::scoped_lock lock_connect(m_connect_mutex);
   m_socket_ptr->async_connect(m_remote_endpoint, [this](boost::system::error_code ec) {
-    ROS_ERROR("TCP error code: %i", ec.value());
+    if (ec != 0)
+    {
+      ROS_ERROR("TCP error code: %i", ec.value());
+    }
+    else
+    {
+      ROS_INFO("TCP connection successfully established.");
+    }
     m_connect_condition.notify_all();
   });
 
-  m_connect_condition.wait(lock);
+  m_connect_condition.wait(lock_connect);
 }
 
 
 void AsyncTCPClient::doSendAndReceive(
   const sick::datastructure::PacketBuffer::VectorBuffer& sendBuffer)
 {
+  boost::mutex::scoped_lock lock(m_socket_mutex);
   if (!m_socket_ptr)
   {
     return;
@@ -92,13 +123,14 @@ void AsyncTCPClient::doSendAndReceive(
 
 void AsyncTCPClient::initiateReceive()
 {
+  boost::mutex::scoped_lock lock(m_socket_mutex);
   if (!m_socket_ptr)
   {
     return;
   }
   m_socket_ptr->async_read_some(boost::asio::buffer(m_recv_buffer),
                                 [this](boost::system::error_code ec, std::size_t bytes_recvd) {
-                                  this->handle_receive(ec, bytes_recvd);
+                                  this->handleReceive(ec, bytes_recvd);
                                 });
 }
 
@@ -122,10 +154,10 @@ void AsyncTCPClient::handleSendAndReceive(const boost::system::error_code& error
 }
 
 
-void AsyncTCPClient::start_receive() {}
+void AsyncTCPClient::startReceive() {}
 
-void AsyncTCPClient::handle_receive(const boost::system::error_code& error,
-                                    const std::size_t& bytes_transferred)
+void AsyncTCPClient::handleReceive(const boost::system::error_code& error,
+                                   const std::size_t& bytes_transferred)
 {
   if (!error)
   {

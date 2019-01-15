@@ -38,9 +38,6 @@
 #include <iostream>
 #include <vector>
 
-#include <sick_safetyscanners/datastructure/ScanPoint.h>
-
-
 namespace sick {
 namespace datastructure {
 
@@ -55,6 +52,20 @@ public:
    * \brief The constructor of the field data.
    */
   FieldData();
+
+  /*!
+   * \brief Returns if the received field data is valid.
+   *
+   * \returns If the received field data is valid.
+   */
+  bool getIsValid() const;
+
+  /*!
+   * \brief Sets if the field data is valid.
+   *
+   * \param is_valid if the field data is valid.
+   */
+  void setIsValid(bool is_valid);
 
   /*!
    * \brief Returns the index of the field set the field belongs to.
@@ -99,22 +110,6 @@ public:
   void setIsProtectiveField(bool is_protective_field);
 
   /*!
-   * \brief Returns the field geometry data as scanpoint.
-   *
-   * Not implemented yet.
-   *
-   * \returns The field geometry data as a scanpoint.
-   */
-  ScanPoint getFieldGeometry() const;
-
-  /*!
-   * \brief Sets the field geometry as scanpoints.
-   *
-   * \param field_geometry The new scanpoint.
-   */
-  void setFieldGeometry(const ScanPoint& field_geometry);
-
-  /*!
    * \brief Returns vector with beam distances.
    *
    * \returns Vector with beam distances.
@@ -128,12 +123,56 @@ public:
    */
   void setBeamDistances(const std::vector<uint16_t>& beam_distances);
 
+  /*!
+   * \brief Get the start angle of the scan.
+   * \return Start angle of the scan.
+   */
+  float getStartAngle() const;
+
+  /*!
+   * \brief Set the start angle of the scan.
+   * \param start_angle Start angle of the scan.
+   */
+  void setStartAngle(const int32_t& start_angle);
+
+  /*!
+   * \brief Set the start angle of the scan from degrees.
+   * \param start_angle Start angle of the scan in degrees.
+   */
+  void setStartAngleDegrees(const float& start_angle);
+
+
+  /*!
+   * \brief Returns the angular resolution between the beams.
+   * \return Angular resolution between beams.
+   */
+  float getAngularBeamResolution() const;
+
+  /*!
+   * \brief Set the angular resolution between beams.
+   * \param angular_beam_resolution The angular resolution between two beams.
+   */
+  void setAngularBeamResolution(const int32_t& angular_beam_resolution);
+
+  /*!
+   * \brief Set the angular resolution between beams from degrees.
+   * \param angular_beam_resolution The angular resolution between two beams in degrees.
+   */
+  void setAngularBeamResolutionDegrees(const float& angular_beam_resolution);
+
 private:
+  /*!
+   * \brief Defined angle resolution to convert sensor input to the right frame
+   */
+  const double ANGLE_RESOLUTION = 4194304.0;
+
+  bool m_is_valid;
   uint16_t m_field_set_index;
   bool m_is_warning_field;
   bool m_is_protective_field;
-  ScanPoint m_field_geometry;
   std::vector<uint16_t> m_beam_distances; // in mm
+  float m_start_angle;
+  float m_angular_beam_resolution;
 };
 
 

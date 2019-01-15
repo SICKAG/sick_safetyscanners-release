@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>sick_safetyscanners</name>
-  <version>1.0.1</version>
-  <description>Provides an Interface to read the sensor output of a sick
-  safety laserscanner</description>
+  <version>1.0.2</version>
+  <description>Provides an Interface to read the sensor output of a SICK
+  Safety Scanner</description>
 
   <maintainer email="puck@fzi.de">Lennart Puck</maintainer>
+
+  <author>Lennart Puck</author>
 
   <license>ALv2</license>
 
