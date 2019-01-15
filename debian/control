@@ -1,0 +1,12 @@
+Source: ros-jade-sick-safetyscanners
+Section: misc
+Priority: extra
+Maintainer: Lennart Puck <puck@fzi.de>
+Build-Depends: debhelper (>= 9.0.0), ros-jade-catkin, ros-jade-dynamic-reconfigure, ros-jade-message-generation, ros-jade-roscpp, ros-jade-sensor-msgs, ros-jade-std-msgs
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-jade-sick-safetyscanners
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-jade-dynamic-reconfigure, ros-jade-message-runtime, ros-jade-roscpp, ros-jade-rqt-reconfigure, ros-jade-sensor-msgs, ros-jade-std-msgs
+Description: Provides an Interface to read the sensor output of a SICK Safety Scanner
