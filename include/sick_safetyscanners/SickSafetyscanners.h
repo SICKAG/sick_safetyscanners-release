@@ -43,6 +43,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <sick_safetyscanners/communication/AsyncTCPClient.h>
 #include <sick_safetyscanners/communication/AsyncUDPClient.h>
@@ -56,7 +57,10 @@
 #include <sick_safetyscanners/cola2/DeviceNameVariableCommand.h>
 #include <sick_safetyscanners/cola2/FieldGeometryVariableCommand.h>
 #include <sick_safetyscanners/cola2/FieldHeaderVariableCommand.h>
+#include <sick_safetyscanners/cola2/MeasurementCurrentConfigVariableCommand.h>
+#include <sick_safetyscanners/cola2/MeasurementPersistentConfigVariableCommand.h>
 #include <sick_safetyscanners/cola2/MonitoringCaseTableHeaderVariableCommand.h>
+#include <sick_safetyscanners/cola2/MonitoringCaseVariableCommand.h>
 #include <sick_safetyscanners/cola2/TypeCodeVariableCommand.h>
 
 namespace sick {
@@ -80,7 +84,7 @@ public:
    * \param settings Current settings for the sensor.
    */
   SickSafetyscanners(packetReceivedCallbackFunction newPacketReceivedCallbackFunction,
-                     sick::datastructure::CommSettings settings);
+                     sick::datastructure::CommSettings* settings);
 
   /*!
    * \brief Destructor
@@ -107,6 +111,35 @@ public:
   void requestTypeCode(const sick::datastructure::CommSettings& settings,
                        sick::datastructure::TypeCode& type_code);
 
+  /*!
+   * \brief Requests data of the protective and warning fields from the sensor.
+   *
+   * \param settings Settings containing information to establish a connection to the sensor.
+   * \param field_data Returned field data.
+   */
+  void requestFieldData(const sick::datastructure::CommSettings& settings,
+                        std::vector<sick::datastructure::FieldData>& field_data);
+
+  /*!
+   * \brief Requests the name of the device from the sensor.
+   *
+   * \param settings Settings containing information to establish a connection to the sensor.
+   * \param device_name Returned device name.
+   */
+  void requestDeviceName(const sick::datastructure::CommSettings& settings,
+                         std::string& device_name);
+
+  /*!
+   * \brief Requests the monitoring cases from the sensor.
+   *
+   * \param settings Settings containing information to establish a connection to the sensor.
+   * \param monitoring_cases Returned monitoring cases.
+   */
+  void
+  requestMonitoringCases(const sick::datastructure::CommSettings& settings,
+                         std::vector<sick::datastructure::MonitoringCaseData>& monitoring_cases);
+
+
 private:
   packetReceivedCallbackFunction m_newPacketReceivedCallbackFunction;
 
@@ -121,16 +154,22 @@ private:
   std::shared_ptr<sick::data_processing::UDPPacketMerger> m_packet_merger_ptr;
 
   std::string m_device_name;
+  int m_active_case_number;
 
   void processUDPPacket(const datastructure::PacketBuffer& buffer);
   bool UDPClientThread();
   void processTCPPacket(const sick::datastructure::PacketBuffer& buffer);
   void startTCPConnection(const sick::datastructure::CommSettings& settings);
-  void changeCommSettingsinColaSession(const datastructure::CommSettings& settings);
+  void changeCommSettingsInColaSession(const datastructure::CommSettings& settings);
   void stopTCPConnection();
-  void requestTypeCodeinColaSession(sick::datastructure::TypeCode& type_code);
+  void requestTypeCodeInColaSession(sick::datastructure::TypeCode& type_code);
+  void requestFieldDataInColaSession(std::vector<sick::datastructure::FieldData>& fields);
+  void requestDeviceNameInColaSession(std::string& device_name);
+  void requestMonitoringCaseDataInColaSession(
+    std::vector<sick::datastructure::MonitoringCaseData>& monitoring_cases);
 };
 
 } // namespace sick
+
 
 #endif // SICK_SAFETYSCANNERS_SICKSAFETYSCANNERS_H

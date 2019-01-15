@@ -89,7 +89,12 @@ public:
   /*!
    * \brief Establishes a connection from the host to the sensor.
    */
-  void do_connect();
+  void doConnect();
+
+  /*!
+   * \brief Disconnects the host from the sensor
+   */
+  void doDisconnect();
 
   /*!
    * \brief Start a cycle of sensing a command and waiting got the return.
@@ -123,10 +128,10 @@ private:
 
   boost::condition m_connect_condition;
   boost::mutex m_connect_mutex;
+  boost::mutex m_socket_mutex;
 
-
-  void start_receive();
-  void handle_receive(const boost::system::error_code& error, const std::size_t& bytes_transferred);
+  void startReceive();
+  void handleReceive(const boost::system::error_code& error, const std::size_t& bytes_transferred);
 
 
   AsyncTCPClient(AsyncTCPClient&); // block default copy constructor
