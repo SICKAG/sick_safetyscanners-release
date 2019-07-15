@@ -50,6 +50,7 @@
 #include <sick_safetyscanners/data_processing/ParseData.h>
 #include <sick_safetyscanners/data_processing/UDPPacketMerger.h>
 #include <sick_safetyscanners/datastructure/CommSettings.h>
+#include <sick_safetyscanners/datastructure/ConfigData.h>
 #include <sick_safetyscanners/datastructure/PacketBuffer.h>
 
 #include <sick_safetyscanners/cola2/ChangeCommSettingsCommand.h>
@@ -130,6 +131,14 @@ public:
                          std::string& device_name);
 
   /*!
+   * \brief Requests the persistent configuration from the sensor.
+   *
+   * \param settings Settings containing information to establish a connection to the sensor.
+   * \param config_data Returned persistent configuration data.
+   */
+  void requestPersistentConfig(const datastructure::CommSettings& settings,
+                               sick::datastructure::ConfigData& config_data);
+  /*!
    * \brief Requests the monitoring cases from the sensor.
    *
    * \param settings Settings containing information to establish a connection to the sensor.
@@ -156,7 +165,7 @@ private:
   std::string m_device_name;
   int m_active_case_number;
 
-  void processUDPPacket(const datastructure::PacketBuffer& buffer);
+  void processUDPPacket(const sick::datastructure::PacketBuffer& buffer);
   bool UDPClientThread();
   void processTCPPacket(const sick::datastructure::PacketBuffer& buffer);
   void startTCPConnection(const sick::datastructure::CommSettings& settings);
@@ -165,6 +174,7 @@ private:
   void requestTypeCodeInColaSession(sick::datastructure::TypeCode& type_code);
   void requestFieldDataInColaSession(std::vector<sick::datastructure::FieldData>& fields);
   void requestDeviceNameInColaSession(std::string& device_name);
+  void requestPersistentConfigInColaSession(sick::datastructure::ConfigData& config_data);
   void requestMonitoringCaseDataInColaSession(
     std::vector<sick::datastructure::MonitoringCaseData>& monitoring_cases);
 };
