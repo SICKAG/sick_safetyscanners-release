@@ -134,13 +134,13 @@ add_library(${PROJECT_NAME}_core
   src/data_processing/ParseMonitoringCaseData.cpp
   src/data_processing/ParseTCPPacket.cpp
   src/data_processing/ParseTypeCodeData.cpp
-  src/data_processing/ReadWriteHelper.cpp
   src/data_processing/TCPPacketMerger.cpp
   src/data_processing/UDPPacketMerger.cpp
   src/datastructure/ApplicationData.cpp
   src/datastructure/ApplicationInputs.cpp
   src/datastructure/ApplicationOutputs.cpp
   src/datastructure/CommSettings.cpp
+  src/datastructure/ConfigData.cpp
   src/datastructure/Data.cpp
   src/datastructure/DataHeader.cpp
   src/datastructure/DatagramHeader.cpp

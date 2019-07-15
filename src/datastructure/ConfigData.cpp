@@ -25,46 +25,64 @@
 
 //----------------------------------------------------------------------
 /*!
- * \file MonitoringCaseTableHeaderVariableCommand.cpp
+ * \file ConfigData.cpp
  *
  * \author  Lennart Puck <puck@fzi.de>
- * \date    2018-10-17
+ * \date    2019-02-25
  */
 //----------------------------------------------------------------------
 
-#include <sick_safetyscanners/cola2/MonitoringCaseTableHeaderVariableCommand.h>
-
-#include <sick_safetyscanners/cola2/Cola2Session.h>
-#include <sick_safetyscanners/cola2/Command.h>
+#include <sick_safetyscanners/datastructure/ConfigData.h>
 
 namespace sick {
-namespace cola2 {
+namespace datastructure {
 
-// TODO
+ConfigData::ConfigData() {}
 
-MonitoringCaseTableHeaderVariableCommand::MonitoringCaseTableHeaderVariableCommand(
-  Cola2Session& session, datastructure::FieldData& field_data)
-  : VariableCommand(session, 2100)
+float ConfigData::getStartAngle() const
 {
-  m_field_header_parser_ptr = std::make_shared<sick::data_processing::ParseFieldHeaderData>();
+  return m_start_angle;
 }
 
-bool MonitoringCaseTableHeaderVariableCommand::canBeExecutedWithoutSessionID() const
+void ConfigData::setStartAngle(const int32_t& start_angle)
 {
-  return true;
+  m_start_angle = (float)start_angle / ANGLE_RESOLUTION;
 }
 
-bool MonitoringCaseTableHeaderVariableCommand::processReply()
+void ConfigData::setStartAngleDegrees(const float& start_angle)
 {
-  if (!base_class::processReply())
-  {
-    return false;
-  }
-
-  // m_field_header_parser_ptr->parseTCPSequence(getDataVector(),m_field_data);
-  return true;
+  m_start_angle = start_angle;
 }
 
+float ConfigData::getEndAngle() const
+{
+  return m_end_angle;
+}
 
-} // namespace cola2
+void ConfigData::setEndAngle(const int32_t& end_angle)
+{
+  m_end_angle = (float)end_angle / ANGLE_RESOLUTION;
+}
+
+void ConfigData::setEndAngleDegrees(const float& end_angle)
+{
+  m_end_angle = end_angle;
+}
+
+float ConfigData::getAngularBeamResolution() const
+{
+  return m_angular_beam_resolution;
+}
+
+void ConfigData::setAngularBeamResolution(const int32_t& angular_beam_resolution)
+{
+  m_angular_beam_resolution = (float)angular_beam_resolution / ANGLE_RESOLUTION;
+}
+
+void ConfigData::setAngularBeamResolutionDegrees(const float& angular_beam_resolution)
+{
+  m_angular_beam_resolution = angular_beam_resolution;
+}
+
+} // namespace datastructure
 } // namespace sick
