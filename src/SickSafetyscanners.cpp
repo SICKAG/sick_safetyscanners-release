@@ -57,6 +57,8 @@ SickSafetyscanners::SickSafetyscanners(
 
 SickSafetyscanners::~SickSafetyscanners()
 {
+  m_io_service_ptr->stop();
+  m_udp_client_thread_ptr->join();
   m_udp_client_thread_ptr.reset();
 }
 
@@ -134,6 +136,15 @@ void SickSafetyscanners::requestDeviceName(const datastructure::CommSettings& se
   stopTCPConnection();
 }
 
+void SickSafetyscanners::requestPersistentConfig(const datastructure::CommSettings& settings,
+                                                 sick::datastructure::ConfigData& config_data)
+{
+  startTCPConnection(settings);
+
+  requestPersistentConfigInColaSession(config_data);
+
+  stopTCPConnection();
+}
 
 void SickSafetyscanners::startTCPConnection(const sick::datastructure::CommSettings& settings)
 {
@@ -162,21 +173,22 @@ void SickSafetyscanners::changeCommSettingsInColaSession(
 void SickSafetyscanners::requestFieldDataInColaSession(
   std::vector<sick::datastructure::FieldData>& fields)
 {
-  sick::datastructure::FieldData common_field_data;
+  sick::datastructure::ConfigData config_data;
 
-  sick::cola2::Cola2Session::CommandPtr command_ptr =
+  /*sick::cola2::Cola2Session::CommandPtr command_ptr =
     std::make_shared<sick::cola2::MeasurementPersistentConfigVariableCommand>(
+      boost::ref(*m_session_ptr), pers_config_data);
+  m_session_ptr->executeCommand(command_ptr);
+*/
+  sick::cola2::Cola2Session::CommandPtr command_ptr =
+    std::make_shared<sick::cola2::MeasurementCurrentConfigVariableCommand>(
+      boost::ref(*m_session_ptr), config_data);
+  m_session_ptr->executeCommand(command_ptr);
+  /*
+    command_ptr = std::make_shared<sick::cola2::MonitoringCaseTableHeaderVariableCommand>(
       boost::ref(*m_session_ptr), common_field_data);
-  m_session_ptr->executeCommand(command_ptr);
-
-  command_ptr = std::make_shared<sick::cola2::MeasurementCurrentConfigVariableCommand>(
-    boost::ref(*m_session_ptr), common_field_data);
-  m_session_ptr->executeCommand(command_ptr);
-
-  command_ptr = std::make_shared<sick::cola2::MonitoringCaseTableHeaderVariableCommand>(
-    boost::ref(*m_session_ptr), common_field_data);
-  m_session_ptr->executeCommand(command_ptr);
-
+    m_session_ptr->executeCommand(command_ptr);
+  */
   for (int i = 0; i < 128; i++)
   {
     sick::datastructure::FieldData field_data;
@@ -191,8 +203,8 @@ void SickSafetyscanners::requestFieldDataInColaSession(
         boost::ref(*m_session_ptr), field_data, i);
       m_session_ptr->executeCommand(command_ptr);
 
-      field_data.setStartAngleDegrees(common_field_data.getStartAngle());
-      field_data.setAngularBeamResolutionDegrees(common_field_data.getAngularBeamResolution());
+      field_data.setStartAngleDegrees(config_data.getStartAngle());
+      field_data.setAngularBeamResolutionDegrees(config_data.getAngularBeamResolution());
 
       fields.push_back(field_data);
     }
@@ -241,6 +253,15 @@ void SickSafetyscanners::requestTypeCodeInColaSession(sick::datastructure::TypeC
   m_session_ptr->executeCommand(command_ptr);
 }
 
+void SickSafetyscanners::requestPersistentConfigInColaSession(
+  sick::datastructure::ConfigData& config_data)
+{
+  sick::cola2::Cola2Session::CommandPtr command_ptr =
+    std::make_shared<sick::cola2::MeasurementPersistentConfigVariableCommand>(
+      boost::ref(*m_session_ptr), config_data);
+  m_session_ptr->executeCommand(command_ptr);
+}
+
 void SickSafetyscanners::stopTCPConnection()
 {
   m_session_ptr->close();
@@ -254,9 +275,8 @@ void SickSafetyscanners::processUDPPacket(const sick::datastructure::PacketBuffe
   {
     sick::datastructure::PacketBuffer deployedBuffer =
       m_packet_merger_ptr->getDeployedPacketBuffer();
-    sick::datastructure::Data data;
     sick::data_processing::ParseData data_parser;
-    data_parser.parseUDPSequence(deployedBuffer, data);
+    sick::datastructure::Data data = data_parser.parseUDPSequence(deployedBuffer);
 
     m_newPacketReceivedCallbackFunction(data);
   }
