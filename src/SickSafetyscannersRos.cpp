@@ -46,6 +46,7 @@ SickSafetyscannersRos::SickSafetyscannersRos()
   , m_range_min(0.0)
   , m_range_max(0.0)
   , m_angle_offset(-90.0)
+  , m_use_pers_conf(false)
 {
   dynamic_reconfigure::Server<
     sick_safetyscanners::SickSafetyscannersConfigurationConfig>::CallbackType reconf_callback =
@@ -56,6 +57,8 @@ SickSafetyscannersRos::SickSafetyscannersRos()
     ROS_ERROR("Could not read parameters.");
     ros::requestShutdown();
   }
+  // tcp port can not be changed in the sensor configuration, therefore it is hardcoded
+  m_communication_settings.setSensorTcpPort(2122);
   m_laser_scan_publisher = m_nh.advertise<sensor_msgs::LaserScan>("scan", 100);
   m_extended_laser_scan_publisher =
     m_nh.advertise<sick_safetyscanners::ExtendedLaserScanMsg>("extended_laser_scan", 100);
@@ -70,6 +73,11 @@ SickSafetyscannersRos::SickSafetyscannersRos()
   m_device->run();
   readTypeCodeSettings();
 
+  if (m_use_pers_conf)
+  {
+    readPersistentConfig();
+  }
+
   m_device->changeSensorSettings(m_communication_settings);
   m_initialised = true;
   ROS_INFO("Successfully launched node.");
@@ -77,11 +85,21 @@ SickSafetyscannersRos::SickSafetyscannersRos()
 
 void SickSafetyscannersRos::readTypeCodeSettings()
 {
+  ROS_INFO("Reading Type code settings");
   sick::datastructure::TypeCode type_code;
   m_device->requestTypeCode(m_communication_settings, type_code);
   m_communication_settings.setEInterfaceType(type_code.getInterfaceType());
   m_range_min = 0.1;
   m_range_max = type_code.getMaxRange();
+}
+
+void SickSafetyscannersRos::readPersistentConfig()
+{
+  ROS_INFO("Reading Persistent Configuration");
+  sick::datastructure::ConfigData config_data;
+  m_device->requestPersistentConfig(m_communication_settings, config_data);
+  m_communication_settings.setStartAngle(config_data.getStartAngle());
+  m_communication_settings.setEndAngle(config_data.getEndAngle());
 }
 
 void SickSafetyscannersRos::reconfigure_callback(
@@ -132,13 +150,6 @@ bool SickSafetyscannersRos::readParameters()
   }
   m_communication_settings.setSensorIp(sensor_ip_adress);
 
-  int sensor_tcp_port = 2122;
-  if (!m_private_nh.getParam("sensor_tcp_port", sensor_tcp_port))
-  {
-    ROS_WARN("Using default sensor TCP port: %i", sensor_tcp_port);
-  }
-  m_communication_settings.setSensorTcpPort(sensor_tcp_port);
-
 
   std::string host_ip_adress = "192.168.1.9";
   if (!m_private_nh.getParam("host_ip", host_ip_adress))
@@ -172,11 +183,21 @@ bool SickSafetyscannersRos::readParameters()
 
   float angle_start;
   m_private_nh.getParam("angle_start", angle_start);
-  m_communication_settings.setStartAngle(sick::radToDeg(angle_start));
 
   float angle_end;
   m_private_nh.getParam("angle_end", angle_end);
-  m_communication_settings.setEndAngle(sick::radToDeg(angle_end));
+
+  // Included check before calculations to prevent rounding errors while calculating
+  if (angle_start == angle_end)
+  {
+    m_communication_settings.setStartAngle(sick::radToDeg(0));
+    m_communication_settings.setEndAngle(sick::radToDeg(0));
+  }
+  else
+  {
+    m_communication_settings.setStartAngle(sick::radToDeg(angle_start) - m_angle_offset);
+    m_communication_settings.setEndAngle(sick::radToDeg(angle_end) - m_angle_offset);
+  }
 
   bool general_system_state;
   m_private_nh.getParam("general_system_state", general_system_state);
@@ -198,16 +219,7 @@ bool SickSafetyscannersRos::readParameters()
 
   m_private_nh.getParam("frame_id", m_frame_id);
 
-  m_private_nh.getParam("use_sick_angles", m_use_sick_angles);
-
-  if (m_use_sick_angles)
-  {
-    m_angle_offset = 0;
-  }
-  else
-  {
-    m_angle_offset = -90.0;
-  }
+  m_private_nh.getParam("use_persistent_config", m_use_pers_conf);
 
   return true;
 }
