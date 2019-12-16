@@ -39,7 +39,6 @@ namespace data_processing {
 
 UDPPacketMerger::UDPPacketMerger()
   : m_is_complete(false)
-  , m_deployed_packet_buffer()
 {
 }
 
@@ -100,7 +99,9 @@ bool UDPPacketMerger::deployPacketIfComplete(datastructure::DatagramHeader& head
     return false;
   }
   if (!checkIfComplete(header))
+  {
     return false;
+  }
 
   sick::datastructure::ParsedPacketBuffer::ParsedPacketBufferVector vec =
     getSortedParsedPacketBufferForIdentification(header);
@@ -157,11 +158,11 @@ std::vector<uint8_t> UDPPacketMerger::removeHeaderFromParsedPacketBuffer(
     sick::datastructure::PacketBuffer packet_buffer = parsed_packet_buffer.getPacketBuffer();
 
     // This insert is memory safe because we constructed the buffer in this function
-    const std::shared_ptr<std::vector<uint8_t> const> vecPtr = packet_buffer.getBuffer();
+    const std::shared_ptr<std::vector<uint8_t> const> vec_ptr = packet_buffer.getBuffer();
     headerless_packet_buffer.insert(headerless_packet_buffer.end(),
-                                    vecPtr->begin() +
+                                    vec_ptr->begin() +
                                       sick::datastructure::DatagramHeader::HEADER_SIZE,
-                                    vecPtr->end());
+                                    vec_ptr->end());
   }
   return headerless_packet_buffer;
 }
