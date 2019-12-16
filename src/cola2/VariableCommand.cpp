@@ -51,7 +51,7 @@ std::vector<uint8_t> VariableCommand::addTelegramData(const std::vector<uint8_t>
   auto output = expandTelegram(telegram, 2);
   // Add new values after telegram
   auto new_data_offset_it = output.begin() + telegram.size();
-  ReadWriteHelper::writeuint16_tLittleEndian(new_data_offset_it, m_variable_index);
+  read_write_helper::writeUint16LittleEndian(new_data_offset_it, m_variable_index);
   return output;
 }
 
@@ -62,17 +62,19 @@ bool VariableCommand::canBeExecutedWithoutSessionID() const
 
 bool VariableCommand::processReply()
 {
+  bool result = false;
   if ((getCommandType() == 'R' && getCommandMode() == 'A') ||
       (getCommandType() == 0x52 && getCommandMode() == 0x41))
   {
     ROS_INFO("Command Variable Acknowledged.");
-    return true;
+    result = true;
   }
   else
   {
     ROS_WARN("Command Variable Not Accepted.");
-    return false;
+    result = false;
   }
+  return result;
 }
 
 uint16_t VariableCommand::getVariableIndex() const
