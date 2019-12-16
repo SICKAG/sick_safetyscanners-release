@@ -39,8 +39,7 @@
 namespace sick {
 
 SickSafetyscannersRos::SickSafetyscannersRos()
-  : m_nh()
-  , m_private_nh("~")
+  : m_private_nh("~")
   , m_initialised(false)
   , m_time_offset(0.0)
   , m_range_min(0.0)
@@ -50,7 +49,7 @@ SickSafetyscannersRos::SickSafetyscannersRos()
 {
   dynamic_reconfigure::Server<
     sick_safetyscanners::SickSafetyscannersConfigurationConfig>::CallbackType reconf_callback =
-    boost::bind(&SickSafetyscannersRos::reconfigure_callback, this, _1, _2);
+    boost::bind(&SickSafetyscannersRos::reconfigureCallback, this, _1, _2);
   m_dynamic_reconfiguration_server.setCallback(reconf_callback);
   if (!readParameters())
   {
@@ -102,7 +101,7 @@ void SickSafetyscannersRos::readPersistentConfig()
   m_communication_settings.setEndAngle(config_data.getEndAngle());
 }
 
-void SickSafetyscannersRos::reconfigure_callback(
+void SickSafetyscannersRos::reconfigureCallback(
   const sick_safetyscanners::SickSafetyscannersConfigurationConfig& config, const uint32_t& level)
 {
   if (isInitialised())
@@ -470,13 +469,13 @@ SickSafetyscannersRos::createGeneralSystemStateMessage(const sick::datastructure
     }
 
     msg.current_monitoring_case_no_table_1 =
-      general_system_state->getCurrentMonitoringCaseNoTable_1();
+      general_system_state->getCurrentMonitoringCaseNoTable1();
     msg.current_monitoring_case_no_table_2 =
-      general_system_state->getCurrentMonitoringCaseNoTable_2();
+      general_system_state->getCurrentMonitoringCaseNoTable2();
     msg.current_monitoring_case_no_table_3 =
-      general_system_state->getCurrentMonitoringCaseNoTable_3();
+      general_system_state->getCurrentMonitoringCaseNoTable3();
     msg.current_monitoring_case_no_table_4 =
-      general_system_state->getCurrentMonitoringCaseNoTable_4();
+      general_system_state->getCurrentMonitoringCaseNoTable4();
 
     msg.application_error = general_system_state->getApplicationError();
     msg.device_error      = general_system_state->getDeviceError();
@@ -690,9 +689,9 @@ bool SickSafetyscannersRos::getFieldData(sick_safetyscanners::FieldData::Request
     res.fields.push_back(field_msg);
   }
 
-  std::string device_name;
+  datastructure::DeviceName device_name;
   m_device->requestDeviceName(m_communication_settings, device_name);
-  res.device_name = device_name;
+  res.device_name = device_name.getDeviceName();
 
 
   std::vector<sick::datastructure::MonitoringCaseData> monitoring_cases;
