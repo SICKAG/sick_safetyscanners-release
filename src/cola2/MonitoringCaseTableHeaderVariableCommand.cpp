@@ -56,13 +56,16 @@ bool MonitoringCaseTableHeaderVariableCommand::canBeExecutedWithoutSessionID() c
 
 bool MonitoringCaseTableHeaderVariableCommand::processReply()
 {
+  bool result = true;
   if (!base_class::processReply())
   {
-    return false;
+    result = false;
   }
-
+  // else
+  //{
   // m_field_header_parser_ptr->parseTCPSequence(getDataVector(),m_field_data);
-  return true;
+  //}
+  return result;
 }
 
 
