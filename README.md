@@ -1,3 +1,26 @@
+## sick_safetyscanners (melodic) - 1.0.4-1
+
+The packages in the `sick_safetyscanners` repository were released into the `melodic` distro by running `/usr/bin/bloom-release sick_safetyscanners --rosdistro melodic` on `Mon, 16 Dec 2019 15:13:31 -0000`
+
+The `sick_safetyscanners` package was released.
+
+Version of package(s) in repository `sick_safetyscanners`:
+
+- upstream repository: https://github.com/SICKAG/sick_safetyscanners.git
+- release repository: https://github.com/SICKAG/sick_safetyscanners-release.git
+- rosdistro version: `1.0.3-1`
+- old version: `1.0.3-1`
+- new version: `1.0.4-1`
+
+Versions of tools used:
+
+- bloom version: `0.9.0`
+- catkin_pkg version: `0.4.15`
+- rosdep version: `0.17.1`
+- rosdistro version: `0.8.0`
+- vcstools version: `0.1.40`
+
+
 ## sick_safetyscanners (kinetic) - 1.0.4-1
 
 The packages in the `sick_safetyscanners` repository were released into the `kinetic` distro by running `/usr/bin/bloom-release sick_safetyscanners --rosdistro kinetic` on `Mon, 16 Dec 2019 15:06:56 -0000`
