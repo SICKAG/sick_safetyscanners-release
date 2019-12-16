@@ -44,8 +44,8 @@ ParseDataHeader::parseUDPSequence(const datastructure::PacketBuffer& buffer,
                                   datastructure::Data& data) const
 {
   // Keep our own copy of the shared_ptr to keep the iterators valid
-  const std::shared_ptr<std::vector<uint8_t> const> vecPtr = buffer.getBuffer();
-  std::vector<uint8_t>::const_iterator data_ptr            = vecPtr->begin();
+  const std::shared_ptr<std::vector<uint8_t> const> vec_ptr = buffer.getBuffer();
+  std::vector<uint8_t>::const_iterator data_ptr             = vec_ptr->begin();
   datastructure::DataHeader data_header;
   setDataInDataHeader(data_ptr, data_header);
   return data_header;
@@ -99,131 +99,131 @@ void ParseDataHeader::setDataBlocksInDataHeader(std::vector<uint8_t>::const_iter
 void ParseDataHeader::setVersionIndicatorInDataHeader(std::vector<uint8_t>::const_iterator data_ptr,
                                                       datastructure::DataHeader& data_header) const
 {
-  data_header.setVersionIndicator(ReadWriteHelper::readuint8_tLittleEndian(data_ptr + 0));
+  data_header.setVersionIndicator(read_write_helper::readUint8LittleEndian(data_ptr + 0));
 }
 
 void ParseDataHeader::setMajorVersionInDataHeader(std::vector<uint8_t>::const_iterator data_ptr,
                                                   datastructure::DataHeader& data_header) const
 {
-  data_header.setVersionMajorVersion(ReadWriteHelper::readuint8_tLittleEndian(data_ptr + 1));
+  data_header.setVersionMajorVersion(read_write_helper::readUint8LittleEndian(data_ptr + 1));
 }
 
 void ParseDataHeader::setMinorVersionInDataHeader(std::vector<uint8_t>::const_iterator data_ptr,
                                                   datastructure::DataHeader& data_header) const
 {
-  data_header.setVersionMinorVersion(ReadWriteHelper::readuint8_tLittleEndian(data_ptr + 2));
+  data_header.setVersionMinorVersion(read_write_helper::readUint8LittleEndian(data_ptr + 2));
 }
 
 void ParseDataHeader::setVersionReleaseInDataHeader(std::vector<uint8_t>::const_iterator data_ptr,
                                                     datastructure::DataHeader& data_header) const
 {
-  data_header.setVersionRelease(ReadWriteHelper::readuint8_tLittleEndian(data_ptr + 3));
+  data_header.setVersionRelease(read_write_helper::readUint8LittleEndian(data_ptr + 3));
 }
 
 void ParseDataHeader::setSerialNumberOfDeviceInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
-  data_header.setSerialNumberOfDevice(ReadWriteHelper::readuint32_tLittleEndian(data_ptr + 4));
+  data_header.setSerialNumberOfDevice(read_write_helper::readUint32LittleEndian(data_ptr + 4));
 }
 
 void ParseDataHeader::setSerialNumberOfSystemPlugInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
-  data_header.setSerialNumberOfSystemPlug(ReadWriteHelper::readuint32_tLittleEndian(data_ptr + 8));
+  data_header.setSerialNumberOfSystemPlug(read_write_helper::readUint32LittleEndian(data_ptr + 8));
 }
 
 void ParseDataHeader::setChannelNumberInDataHeader(std::vector<uint8_t>::const_iterator data_ptr,
                                                    datastructure::DataHeader& data_header) const
 {
-  data_header.setChannelNumber(ReadWriteHelper::readuint8_tLittleEndian(data_ptr + 12));
+  data_header.setChannelNumber(read_write_helper::readUint8LittleEndian(data_ptr + 12));
 }
 
 void ParseDataHeader::setSequenceNumberInDataHeader(std::vector<uint8_t>::const_iterator data_ptr,
                                                     datastructure::DataHeader& data_header) const
 {
-  data_header.setSequenceNumber(ReadWriteHelper::readuint32_tLittleEndian(data_ptr + 16));
+  data_header.setSequenceNumber(read_write_helper::readUint32LittleEndian(data_ptr + 16));
 }
 
 void ParseDataHeader::setScanNumberInDataHeader(std::vector<uint8_t>::const_iterator data_ptr,
                                                 datastructure::DataHeader& data_header) const
 {
-  data_header.setScanNumber(ReadWriteHelper::readuint32_tLittleEndian(data_ptr + 20));
+  data_header.setScanNumber(read_write_helper::readUint32LittleEndian(data_ptr + 20));
 }
 
 void ParseDataHeader::setTimestampDateInDataHeader(std::vector<uint8_t>::const_iterator data_ptr,
                                                    datastructure::DataHeader& data_header) const
 {
-  data_header.setTimestampDate(ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 24));
+  data_header.setTimestampDate(read_write_helper::readUint16LittleEndian(data_ptr + 24));
 }
 
 void ParseDataHeader::setTimestampTimeInDataHeader(std::vector<uint8_t>::const_iterator data_ptr,
                                                    datastructure::DataHeader& data_header) const
 {
-  data_header.setTimestampTime(ReadWriteHelper::readuint32_tLittleEndian(data_ptr + 28));
+  data_header.setTimestampTime(read_write_helper::readUint32LittleEndian(data_ptr + 28));
 }
 
 void ParseDataHeader::setGeneralSystemStateBlockOffsetInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
   data_header.setGeneralSystemStateBlockOffset(
-    ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 32));
+    read_write_helper::readUint16LittleEndian(data_ptr + 32));
 }
 
 void ParseDataHeader::setGeneralSystemStateBlockSizeInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
   data_header.setGeneralSystemStateBlockSize(
-    ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 34));
+    read_write_helper::readUint16LittleEndian(data_ptr + 34));
 }
 
 void ParseDataHeader::setDerivedValuesBlockOffsetInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
-  data_header.setDerivedValuesBlockOffset(ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 36));
+  data_header.setDerivedValuesBlockOffset(read_write_helper::readUint16LittleEndian(data_ptr + 36));
 }
 
 void ParseDataHeader::setDerivedValuesBlockSizeInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
-  data_header.setDerivedValuesBlockSize(ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 38));
+  data_header.setDerivedValuesBlockSize(read_write_helper::readUint16LittleEndian(data_ptr + 38));
 }
 
 void ParseDataHeader::setMeasurementDataBlockOffsetInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
   data_header.setMeasurementDataBlockOffset(
-    ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 40));
+    read_write_helper::readUint16LittleEndian(data_ptr + 40));
 }
 
 void ParseDataHeader::setMeasurementDataBlockSizeInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
-  data_header.setMeasurementDataBlockSize(ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 42));
+  data_header.setMeasurementDataBlockSize(read_write_helper::readUint16LittleEndian(data_ptr + 42));
 }
 
 void ParseDataHeader::setIntrusionDataBlockOffsetInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
-  data_header.setIntrusionDataBlockOffset(ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 44));
+  data_header.setIntrusionDataBlockOffset(read_write_helper::readUint16LittleEndian(data_ptr + 44));
 }
 
 void ParseDataHeader::setIntrusionDataBlockSizeInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
-  data_header.setIntrusionDataBlockSize(ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 46));
+  data_header.setIntrusionDataBlockSize(read_write_helper::readUint16LittleEndian(data_ptr + 46));
 }
 
 void ParseDataHeader::setApplicationDataBlockOffsetInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
   data_header.setApplicationDataBlockOffset(
-    ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 48));
+    read_write_helper::readUint16LittleEndian(data_ptr + 48));
 }
 
 void ParseDataHeader::setApplicationDataBlockSizeInDataHeader(
   std::vector<uint8_t>::const_iterator data_ptr, datastructure::DataHeader& data_header) const
 {
-  data_header.setApplicationDataBlockSize(ReadWriteHelper::readuint16_tLittleEndian(data_ptr + 50));
+  data_header.setApplicationDataBlockSize(read_write_helper::readUint16LittleEndian(data_ptr + 50));
 }
 
 } // namespace data_processing
