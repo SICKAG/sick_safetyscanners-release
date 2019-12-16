@@ -39,7 +39,6 @@ namespace data_processing {
 
 TCPPacketMerger::TCPPacketMerger()
   : m_is_complete(false)
-  , m_deployed_packet_buffer()
 {
 }
 
@@ -75,12 +74,12 @@ bool TCPPacketMerger::addTCPPacket(const datastructure::PacketBuffer& buffer)
   return isComplete();
 }
 
-bool TCPPacketMerger::addToMap(const datastructure::PacketBuffer& newPacket)
+bool TCPPacketMerger::addToMap(const datastructure::PacketBuffer& new_packet)
 {
-  uint32_t currentSize   = getCurrentSize();
-  uint32_t remainingSize = m_targetSize - currentSize;
-  m_buffer_vector.push_back(newPacket);
-  if (remainingSize == newPacket.getLength())
+  uint32_t current_size   = getCurrentSize();
+  uint32_t remaining_size = m_targetSize - current_size;
+  m_buffer_vector.push_back(new_packet);
+  if (remaining_size == new_packet.getLength())
   {
     m_is_complete = true;
   }
@@ -104,8 +103,9 @@ bool TCPPacketMerger::deployPacket()
   for (auto& parsed_packet_buffer : m_buffer_vector)
   {
     // This insert is memory safe because we constructed the vector in this function
-    const std::shared_ptr<std::vector<uint8_t> const> vecPtr = parsed_packet_buffer.getBuffer();
-    headerless_packet_buffer.insert(headerless_packet_buffer.end(), vecPtr->begin(), vecPtr->end());
+    const std::shared_ptr<std::vector<uint8_t> const> vec_ptr = parsed_packet_buffer.getBuffer();
+    headerless_packet_buffer.insert(
+      headerless_packet_buffer.end(), vec_ptr->begin(), vec_ptr->end());
   }
   m_deployed_packet_buffer.setBuffer(headerless_packet_buffer);
   m_buffer_vector.clear();

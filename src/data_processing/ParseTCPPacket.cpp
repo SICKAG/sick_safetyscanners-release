@@ -44,16 +44,16 @@ ParseTCPPacket::ParseTCPPacket() {}
 uint32_t ParseTCPPacket::getExpectedPacketLength(const datastructure::PacketBuffer& buffer)
 {
   // Keep our own copy of the shared_ptr to keep the iterators valid
-  const std::shared_ptr<std::vector<uint8_t> const> vecPtr = buffer.getBuffer();
-  std::vector<uint8_t>::const_iterator data_ptr            = vecPtr->begin();
+  const std::shared_ptr<std::vector<uint8_t> const> vec_ptr = buffer.getBuffer();
+  std::vector<uint8_t>::const_iterator data_ptr             = vec_ptr->begin();
   return readLength(data_ptr) + 8; // for STX and Length which is not included in length datafield
 }
 
 uint16_t ParseTCPPacket::getRequestID(const datastructure::PacketBuffer& buffer) const
 {
   // Keep our own copy of the shared_ptr to keep the iterators valid
-  const std::shared_ptr<std::vector<uint8_t> const> vecPtr = buffer.getBuffer();
-  std::vector<uint8_t>::const_iterator data_ptr            = vecPtr->begin();
+  const std::shared_ptr<std::vector<uint8_t> const> vec_ptr = buffer.getBuffer();
+  std::vector<uint8_t>::const_iterator data_ptr             = vec_ptr->begin();
   return readRequestID(data_ptr);
 }
 
@@ -63,8 +63,8 @@ bool ParseTCPPacket::parseTCPSequence(const datastructure::PacketBuffer& buffer,
 {
   setCommandValuesFromPacket(buffer, command);
 
-  std::vector<uint8_t> byteVector = readData(buffer);
-  command.setDataVector(byteVector);
+  std::vector<uint8_t> byte_vector = readData(buffer);
+  command.setDataVector(byte_vector);
 
   return true;
 }
@@ -73,8 +73,8 @@ void ParseTCPPacket::setCommandValuesFromPacket(const sick::datastructure::Packe
                                                 sick::cola2::Command& command) const
 {
   // Keep our own copy of the shared_ptr to keep the iterators valid
-  const std::shared_ptr<std::vector<uint8_t> const> vecPtr = buffer.getBuffer();
-  std::vector<uint8_t>::const_iterator data_ptr            = vecPtr->begin();
+  const std::shared_ptr<std::vector<uint8_t> const> vec_ptr = buffer.getBuffer();
+  std::vector<uint8_t>::const_iterator data_ptr             = vec_ptr->begin();
   command.setSessionID(readSessionID(data_ptr));
   command.setRequestID(readRequestID(data_ptr));
   command.setCommandType(readCommandType(data_ptr));
@@ -83,43 +83,43 @@ void ParseTCPPacket::setCommandValuesFromPacket(const sick::datastructure::Packe
 
 uint32_t ParseTCPPacket::readSTx(std::vector<uint8_t>::const_iterator data_ptr) const
 {
-  return ReadWriteHelper::readuint32_tBigEndian(data_ptr + 0);
+  return read_write_helper::readUint32BigEndian(data_ptr + 0);
 }
 
 uint32_t ParseTCPPacket::readLength(std::vector<uint8_t>::const_iterator data_ptr) const
 {
-  return ReadWriteHelper::readuint32_tBigEndian(data_ptr + 4);
+  return read_write_helper::readUint32BigEndian(data_ptr + 4);
 }
 
 uint8_t ParseTCPPacket::readHubCntr(std::vector<uint8_t>::const_iterator data_ptr) const
 {
-  return ReadWriteHelper::readuint8_tBigEndian(data_ptr + 8);
+  return read_write_helper::readUint8BigEndian(data_ptr + 8);
 }
 uint8_t ParseTCPPacket::readNoC(std::vector<uint8_t>::const_iterator data_ptr) const
 {
-  return ReadWriteHelper::readuint8_tBigEndian(data_ptr + 9);
+  return read_write_helper::readUint8BigEndian(data_ptr + 9);
 }
 uint32_t ParseTCPPacket::readSessionID(std::vector<uint8_t>::const_iterator data_ptr) const
 {
-  return ReadWriteHelper::readuint32_tBigEndian(data_ptr + 10);
+  return read_write_helper::readUint32BigEndian(data_ptr + 10);
 }
 
 uint16_t ParseTCPPacket::readRequestID(std::vector<uint8_t>::const_iterator data_ptr) const
 {
-  return ReadWriteHelper::readuint16_tBigEndian(data_ptr + 14);
+  return read_write_helper::readUint16BigEndian(data_ptr + 14);
 }
 
 uint8_t ParseTCPPacket::readCommandType(std::vector<uint8_t>::const_iterator data_ptr) const
 {
-  return ReadWriteHelper::readuint8_tBigEndian(data_ptr + 16);
+  return read_write_helper::readUint8BigEndian(data_ptr + 16);
 }
 uint8_t ParseTCPPacket::readCommandMode(std::vector<uint8_t>::const_iterator data_ptr) const
 {
-  return ReadWriteHelper::readuint8_tBigEndian(data_ptr + 17);
+  return read_write_helper::readUint8BigEndian(data_ptr + 17);
 }
 uint16_t ParseTCPPacket::readErrorCode(std::vector<uint8_t>::const_iterator data_ptr) const
 {
-  return ReadWriteHelper::readuint16_tBigEndian(data_ptr + 18);
+  return read_write_helper::readUint16BigEndian(data_ptr + 18);
 }
 
 std::vector<uint8_t> ParseTCPPacket::readData(const datastructure::PacketBuffer& buffer) const
@@ -129,9 +129,8 @@ std::vector<uint8_t> ParseTCPPacket::readData(const datastructure::PacketBuffer&
     return std::vector<uint8_t>();
   }
   // Keep our own copy of the shared_ptr to keep the iterators valid
-  const std::shared_ptr<std::vector<uint8_t> const> vecPtr = buffer.getBuffer();
-  std::vector<uint8_t>::const_iterator data_ptr            = vecPtr->begin();
-  return std::vector<uint8_t>(vecPtr->begin() + 20, vecPtr->end());
+  const std::shared_ptr<std::vector<uint8_t> const> vec_ptr = buffer.getBuffer();
+  return std::vector<uint8_t>(vec_ptr->begin() + 20, vec_ptr->end());
 }
 
 } // namespace data_processing
