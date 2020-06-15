@@ -13,7 +13,7 @@ A ROS Driver which reads the raw data from the SICK Safety Scanners and publishe
 
 Supported are all microScan3, nanoScan3 and outdoorScan3 variants with Ethernet connection.
 
-![ ](docs/images/safetyscanners.jpeg  "Sick Safetyscanner Family")
+![ ](docs/images/safetyscanners.png  "Sick Safetyscanner Family")
 
 
 
@@ -105,6 +105,12 @@ Gives feedback of the current status of the output paths.
 
 Publishes the raw data from the sensor as a ROS message.
 
+`
+~/diagnostics (type: diagnostic_msgs/DiagnosticArray)
+`
+
+Frequency and timestamp diagnostics information.
+
 ### Advertised ROS Services
 
 `
@@ -132,6 +138,10 @@ Returns all configured protective and warning fields for the sensor
 | intrusion_data          | Boolean | true | | If the intrusion data should be published  |
 | application_io_data  | Boolean | true | | If the application IO data should be published  |
 | use_persistent_config | Boolean |  false | | If this flag is set, the configured angles from the sensor are loaded and used and the ROS parameters *angle_start* and *angle_end* are disregarded|
+| expected_frequency | Double | 24.0 | | Expected scanner frequency for diagnostics |
+| frequency_tolerance | Double | 0.1 | | Diagnostics tolerance on expected frequency |
+| timestamp_min_acceptable | Double | -1 | | Earliest acceptable timestamp delay for diagnostics |
+| timestamp_max_acceptable | Double | 1 | | Latest acceptable timestamp delay for diagnostics |
 
 ## Creators
 
