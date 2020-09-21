@@ -1,3 +1,26 @@
+## sick_safetyscanners (noetic) - 1.0.6-1
+
+The packages in the `sick_safetyscanners` repository were released into the `noetic` distro by running `/usr/bin/bloom-release sick_safetyscanners --rosdistro noetic` on `Mon, 21 Sep 2020 08:48:17 -0000`
+
+The `sick_safetyscanners` package was released.
+
+Version of package(s) in repository `sick_safetyscanners`:
+
+- upstream repository: https://github.com/SICKAG/sick_safetyscanners.git
+- release repository: https://github.com/SICKAG/sick_safetyscanners-release.git
+- rosdistro version: `1.0.5-2`
+- old version: `1.0.5-2`
+- new version: `1.0.6-1`
+
+Versions of tools used:
+
+- bloom version: `0.9.8`
+- catkin_pkg version: `0.4.22`
+- rosdep version: `0.19.0`
+- rosdistro version: `0.8.2`
+- vcstools version: `0.1.42`
+
+
 ## sick_safetyscanners (noetic) - 1.0.5-2
 
 The packages in the `sick_safetyscanners` repository were released into the `noetic` distro by running `/usr/bin/bloom-release sick_safetyscanners --rosdistro noetic` on `Mon, 15 Jun 2020 15:48:27 -0000`
