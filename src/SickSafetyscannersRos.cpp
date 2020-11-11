@@ -141,6 +141,8 @@ void SickSafetyscannersRos::reconfigureCallback(
     m_time_offset = config.time_offset;
 
     m_expected_frequency = config.expected_frequency;
+
+    m_min_intensities = config.min_intensities;
   }
 }
 
@@ -239,6 +241,8 @@ bool SickSafetyscannersRos::readParameters()
   m_private_nh.getParam("frame_id", m_frame_id);
 
   m_private_nh.getParam("use_persistent_config", m_use_pers_conf);
+
+  m_private_nh.getParam("min_intensities", m_min_intensities);
 
   return true;
 }
@@ -414,17 +418,24 @@ SickSafetyscannersRos::createLaserScanMessage(const sick::datastructure::Data& d
   for (uint32_t i = 0; i < num_scan_points; ++i)
   {
     const sick::datastructure::ScanPoint scan_point = scan_points.at(i);
-    scan.ranges[i]                                  = static_cast<float>(scan_point.getDistance()) *
-                     data.getDerivedValuesPtr()->getMultiplicationFactor() * 1e-3; // mm -> m
-    // Set values close to/greater than max range to infinity according to REP 117
-    // https://www.ros.org/reps/rep-0117.html
-    if (scan.ranges[i] >= (0.999 * m_range_max))
+    // Filter for intensities
+    if (m_min_intensities < static_cast<double>(scan_point.getReflectivity()))
+    {
+      scan.ranges[i] = static_cast<float>(scan_point.getDistance()) *
+                       data.getDerivedValuesPtr()->getMultiplicationFactor() * 1e-3; // mm -> m
+      // Set values close to/greater than max range to infinity according to REP 117
+      // https://www.ros.org/reps/rep-0117.html
+      if (scan.ranges[i] >= (0.999 * m_range_max))
+      {
+        scan.ranges[i] = std::numeric_limits<double>::infinity();
+      }
+    }
+    else
     {
       scan.ranges[i] = std::numeric_limits<double>::infinity();
     }
     scan.intensities[i] = static_cast<float>(scan_point.getReflectivity());
   }
-
   return scan;
 }
 
@@ -442,9 +453,15 @@ SickSafetyscannersRos::createOutputPathsMessage(const sick::datastructure::Data&
 
   std::vector<uint16_t> monitoring_case_numbers  = outputs.getMonitoringCaseVector();
   std::vector<bool> monitoring_case_number_flags = outputs.getMonitoringCaseFlagsVector();
-  if (monitoring_case_number_flags.at(0))
+
+  // Fix according to issue #46, however why this appears is not clear
+  if (monitoring_case_number_flags.size() > 0)
   {
     msg.active_monitoring_case = monitoring_case_numbers.at(0);
+  }
+  else
+  {
+    msg.active_monitoring_case = 0;
   }
 
   for (size_t i = 0; i < eval_out.size(); i++)
